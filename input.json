@@ -1,0 +1,27 @@
+
+{
+    "q1": {
+      "text": "नमस्कार, मैं दोस्ती ग्रेटर थाने प्रोजैक्ट से बात कर रही हुँ। हमारी वेबसाइट पर अपना इंटरेस्ट दिखाने के लिए धन्यवाद।। मैं आपकी मदद करने के लिए यहाँ हूँ। क्या आप किसी घर की तलाश में हैं?",
+      "intents": { "yes": "next", "no": "file_path", "others": "transfer"}
+    },
+    "q2": {
+      "text": "बहुत बढ़िया। आप कितने BHK का फ्लैट देखना चहाते है ?",
+      "intents": { "bhk": "next", "not_interested": "","others": "transfer"}
+    },
+    "q3": {
+      "text": "ठीक है। क्या मैं आपका बजट जान सकती हूँ?",
+      "intents": { "budget": "next", "not_interested": "","others": "transfer"}
+    },
+    "q5": {
+      "text": "ठीक है, आप यह घर अपने लिए खरीदना चाहते हैं या investment purpose के लिए?",
+      "intents": { "purpose": "next", "not_interested": "","others": "transfer"}
+    },
+    "q6": {
+      "text": "आप इसे कब तक खरीदना चाहते हैं?",
+      "intents": { "duration": "next", "not_interested": "","others": "transfer" }
+    }
+  }
+  
+
+
+
