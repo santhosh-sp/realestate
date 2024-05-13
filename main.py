@@ -1,5 +1,5 @@
 from asyncio.constants import LOG_THRESHOLD_FOR_CONNLOST_WRITES
-from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi import FastAPI, Depends, HTTPException, status, Request, BackgroundTasks
 import uvicorn
 import traceback
 # from app.loggers import logging
@@ -51,16 +51,17 @@ async def get_intent(info : models.Intent):
 
 
 @app.post("/anlysis")
-async def get_analysis(info: models.AnalysisModel):
+async def get_analysis(info: models.AnalysisModel, background_tasks: BackgroundTasks):
     """
     Use to get_intent  to every text
     """
     try:
         # logging.info("inside intent api ....")
-        final_data = retrieve_data(calluid=info.call_id)
+        background_tasks.add_task(retrieve_data, info.call_id)
+        # final_data = retrieve_data(calluid=info.call_id)
         # logging.info(final_datafinal_data)
         return JSONResponse(status_code=status.HTTP_200_OK,
-                            content= {"error": False, **final_data})
+                            content= {"error": False, "data":"Success!!!"})
     except Exception as e:
         import traceback
         # logging.error(traceback.format_exc())

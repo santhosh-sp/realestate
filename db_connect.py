@@ -10,20 +10,28 @@ client = OpenAI(api_key=config("OPEN_API_KEY"))
 current_time = datetime.now().strftime("%d-%m-%Y")
 
 
-def get_trans(fullrecording):
-    file = requests.get(fullrecording).content
-    rp=get_dia(file)
-    dia_data=rp.json()['speech_data']
-    trans_rp=get_transcript(file,dia_data)
-    trans_dict=trans_rp.json()['data']['transcript']
-    trans_result=pd.DataFrame(trans_dict)[['start','end','lang_id','text','index','speaker_name','transliteration']].to_dict(orient='records')
-    return trans_result
+def get_trans(records):
+    file = open("input.json")
+    data=json.load(file)
+    full_text =""
+    for i in range(1,7):
+        full_text+=f"agent:{data.get(f'q{i}',{}).get('text','na')} \n"
+        full_text+=f"customer:{records.get(f'userresponse_{i}','na')} \n"
+    # file = requests.get(fullrecording).content
+    # rp=get_dia(file)
+    # dia_data=rp.json()['speech_data']
+    # trans_rp=get_transcript(file,dia_data)
+    # trans_dict=trans_rp.json()['data']['transcript']
+    # trans_result=pd.DataFrame(trans_dict)[['start','end','lang_id','text','index','speaker_name','transliteration']].to_dict(orient='records')
+    # return trans_result
+    # print(records)
+    return full_text
 
 def get_duration(input_text):
-    SYSTEM_PROMPT = f""" You are responsible for detecting the duration from the either Hindi or English sentence. The response should be in json format with key of duration in days with integer or float. If the user says date need to count from {current_time}. Note: convert months into days."""
+    SYSTEM_PROMPT = f""" You are responsible for detecting the duration from the either Hindi or English sentence. The response should be in json format with key of duration in days with integer or float. If the user says date need to count from {current_time}. Note: convert months into days. If there is not duration return with 0."""
 
     response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-3.5-turbo-0125",
     messages=[
         {
         "role": "system",
@@ -54,7 +62,11 @@ def get_con(trans_result):
     return full_text
 
 def get_dia(file):
-    dia_url = "http://office02.servicepack.ai:7999/duration_with_langid?lang_id=false"
+
+    print("dia started...")
+    # dia_url = "http://office02.servicepack.ai:7999/duration_with_langid?lang_id=false"
+
+    dia_url = "http://192.168.5.17:7999/duration_with_langid?lang_id=false"
 
     payload={"lang_code": []}
     files=[('file_name',file)]    
@@ -62,7 +74,9 @@ def get_dia(file):
     return repsonse
 
 def get_transcript(file,dia_data):
-    trans_url = "https://222a-183-82-10-250.ngrok-free.app/transcript"
+
+    print("get transcript started ...")
+    trans_url = "https://nvidia-transcript.voice.servicepack.ai/transcript"
     payload={"lang_id":False,
             "language": "hi-IN",
             "agent_channel":1,
@@ -71,16 +85,21 @@ def get_transcript(file,dia_data):
             "speech_data":json.dumps(dia_data)}
     files=[('file_name',file)]    
     repsonse=requests.post(url=trans_url,data=payload,files=files)
+
+    print(repsonse.text)
     
     return repsonse
 
 def get_sentiment(input_text):
-    system_prompt = f"""As analyst you job is to analyse the given text. The text is taken from a feedback survey in indian regional languages so you need analyse the text. As the text is converted from speech to text model from the audio message from the customer the text might not be proper and might not make any sense in some cases. In those scenarioes i request to strictly please mark it as 'NA'
-    duration_in_days:
-    ou are responsible for detecting the duration from the either Hindi or English sentence. The response should be in json format with key of duration in days with integer or float. If the user says date need to count from {current_time}. Note: convert months into days.
+
+    print("sentiment started ..")
+    system_prompt = f"""
     sentiment:
     sentiment of the overall conversation.
 
+    positive: If the customer responds for more than 3 questions from agent and interested or planning to buy.
+    negative: If there is no responses and not interested to buy.
+    neutral: If the customer is responds fro few questions.
 
     NOTE:The output response format should be compulsorily in json format.
     """
@@ -125,17 +144,24 @@ def get_sentiment(input_text):
 
 
 def get_lead_type(duration):
-    if duration > 1 and duration <=30:
-        return "hot"
-    elif duration > 30 and duration <= 60:
-        return "warm"
-    elif duration > 60:
-        return "cold"
-    else:
+    print(duration)
+
+    try:
+        if duration > 1 and duration <=30:
+            return "hot"
+        elif duration > 30 and duration <= 60:
+            return "warm"
+        elif duration > 60:
+            return "cold"
+        else:
+            return "dead"
+    except Exception as e:
         return "dead"
 
 
 def retrieve_data(calluid):
+
+    print("main process started ......")
     try:
         # Connect to MySQL database
 
@@ -161,14 +187,15 @@ def retrieve_data(calluid):
             # Execute the query with the parameters
 
             # Commit the changes
-            transcript=get_trans(records['fullrecording']) 
-            con_text = get_con(pd.DataFrame(transcript))
-            sentiment = json.loads(get_sentiment(con_text)).get('sentiment','NA')
+            transcript=get_trans(records) 
+        #     con_text = get_con(pd.DataFrame(transcript))
+            sentiment = json.loads(get_sentiment(transcript)).get('sentiment','NA')
             duration = json.loads(get_duration(for_duration)).get('duration',0)
             lead_type = get_lead_type(duration)
             cursor.execute(query_update, (sentiment, duration, lead_type,calluid))
         connection.commit()
-        return {"data": f"for {calluid} {duration}"}
+        print({"data": f"{calluid} {duration} {lead_type} {sentiment}"})
+        return {"data": f"{calluid} {duration} {lead_type} {sentiment}"}
     except mysql.connector.Error as error:
         print("Error connecting to MySQL database:", error)
 
