@@ -51,13 +51,13 @@ async def get_intent(info : models.Intent):
 
 
 @app.post("/anlysis")
-async def get_intent(call_id: str):
+async def get_analysis(info: models.AnalysisModel):
     """
     Use to get_intent  to every text
     """
     try:
         # logging.info("inside intent api ....")
-        final_data = retrieve_data(calluid=call_id)
+        final_data = retrieve_data(calluid=info.call_id)
         # logging.info(final_datafinal_data)
         return JSONResponse(status_code=status.HTTP_200_OK,
                             content= {"error": False, **final_data})

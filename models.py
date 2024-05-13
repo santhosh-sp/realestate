@@ -11,3 +11,6 @@ from typing import List, Dict
 class Intent(BaseModel):
     customer_answer: str
     question:str
+
+class AnalysisModel(BaseModel):
+    call_id:str

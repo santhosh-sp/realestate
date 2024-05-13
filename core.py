@@ -26,22 +26,28 @@ class Intentfinder:
     },
     "q2": {
       "text": "बहुत बढ़िया। आप कितने BHK का फ्लैट देखना चहाते है ?",
-      "intents": { "bhk": "positive", "not_interested": "negative","others": "negative", "hello": "positive"},
+      "intents": { "bhk": "positive", 
+                  "one": "positive", 
+                  "two": "positive", 
+                  "three": "positive",
+                  "not_interested": "negative",
+                  "others": "positive", 
+                  "hello": "positive"},
       "next": "3"
     },
     "q3": {
       "text": "ठीक है। क्या मैं आपका बजट जान सकती हूँ?",
-      "intents": { "budget": "positive", "not_interested": "negative","others": "negative"},
+      "intents": { "budget": "positive", "not_interested": "negative","others": "positive"},
       "next": "4"
     },
     "q4": {
       "text": "ठीक है, आप यह घर अपने लिए खरीदना चाहते हैं या investment purpose के लिए?",
-      "intents": { "purpose": "positive", "not_interested": "negative","others": "negative"},
+      "intents": { "purpose": "positive", "not_interested": "negative","others": "positive"},
       "next": "5"
     },
     "q5": {
       "text": "आप इसे कब तक खरीदना चाहते हैं?",
-      "intents": { "duration": "close", "not_interested": "negative","others": "negative" },
+      "intents": { "duration": "close", "not_interested": "negative","others": "positive" },
       "next": "end"
     }
   }
