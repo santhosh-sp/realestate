@@ -14,7 +14,7 @@ def fireworks_mixtral_intent(prompt,token=config("FIRE_API")):
         "max_tokens": 150,
         "logprobs": None,
         "echo": False,
-        "temperature": 0.2,
+        "temperature": 0.5,
         "top_p": 1,
         "frequency_penalty": 0,
         "presence_penalty": 0,

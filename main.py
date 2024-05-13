@@ -12,6 +12,7 @@ import os
 import core
 from fastapi import FastAPI, Depends, HTTPException, status, Request, UploadFile, File
 from typing import List
+from db_connect import retrieve_data
 
 
 # log  = logging.getLogger("uvicorn")
@@ -49,5 +50,23 @@ async def get_intent(info : models.Intent):
                             content= {"error": True, "data": msg})
 
 
+@app.post("/anlysis")
+async def get_intent(call_id: str):
+    """
+    Use to get_intent  to every text
+    """
+    try:
+        # logging.info("inside intent api ....")
+        final_data = retrieve_data(calluid=call_id)
+        # logging.info(final_datafinal_data)
+        return JSONResponse(status_code=status.HTTP_200_OK,
+                            content= {"error": False, **final_data})
+    except Exception as e:
+        import traceback
+        # logging.error(traceback.format_exc())
+        msg = str(e.error_message if hasattr(e, 'error_message') else e)
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST,
+                            content= {"error": True, "data": msg})
+    
 if  __name__ == "__main__":
     uvicorn.run(app)
