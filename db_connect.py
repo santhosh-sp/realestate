@@ -3,7 +3,9 @@ from datetime import datetime
 import requests,json
 from openai import OpenAI
 import pandas as pd 
-client = OpenAI(api_key="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")
+from decouple import config
+
+client = OpenAI(api_key=config("OPEN_API_KEY"))
 
 current_time = datetime.now().strftime("%d-%m-%Y")
 
