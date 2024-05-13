@@ -195,7 +195,12 @@ def retrieve_data(calluid):
             cursor.execute(query_update, (sentiment, duration, lead_type,calluid))
         connection.commit()
         print({"data": f"{calluid} {duration} {lead_type} {sentiment}"})
-        return {"data": f"{calluid} {duration} {lead_type} {sentiment}"}
+        
+        return {"error": False,
+                "call_id": calluid,
+                 "duration" : duration,
+                  "lead_type": sentiment}
+    
     except mysql.connector.Error as error:
         print("Error connecting to MySQL database:", error)
 

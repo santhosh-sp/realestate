@@ -30,14 +30,14 @@ class Intentfinder:
                   "one": "positive", 
                   "two": "positive", 
                   "three": "positive",
-                  "not_interested": "negative",
+                  "not_interested": "positive",
                   "others": "positive", 
                   "hello": "positive"},
       "next": "3"
     },
     "q3": {
       "text": "ठीक है। क्या मैं आपका बजट जान सकती हूँ?",
-      "intents": { "budget": "positive", "not_interested": "negative","others": "positive"},
+      "intents": { "budget": "positive",  "not_interested": "positive","others": "positive"},
       "next": "4"
     },
     "q4": {
@@ -68,18 +68,19 @@ class Intentfinder:
         try:   
             rp=fireworks_mixtral_intent(prompt=final_prompt)
             intent = json.loads(rp)['categorie']
-            action=self.get_agent_intent(intent,defualt_intents)
+            action=self.get_agent_intent(intent, defualt_intents)
             return {"intent":intent,"action":action, "next_question" : next_question}
         
         except Exception as e:
             logging.info(traceback.format_exc())
             logging.error(str(e))
-            raise APIException(e, sys) from e
+            # raise APIException(e, sys) from e
+            return {"error": True, "message": str(e)}
     
     
-    def get_agent_intent(self,customer_intent,intent_mapping):
+    def get_agent_intent(self,customer_intent, intent_mapping):
         print(intent_mapping,customer_intent)
-        return intent_mapping.get(customer_intent, "Unknown Intent")
+        return intent_mapping.get(customer_intent, "positive")
 
     def get_filename_intent(self,agent_intent,filemame_mapping):
         return filemame_mapping.get(agent_intent, "novoice.mp3")
