@@ -35,14 +35,16 @@ async def get_intent(info : models.Intent):
 
     try:
         # logging.info("inside intent api ....")
-        agent_obj = core.Intentfinder(customer_answer= info.customer_answer,question=info.question)
+        agent_obj = core.Intentfinder(customer_answer= info.customer_answer,
+                                      question=info.question,
+                                      did = info.did)
         final_data = agent_obj.main()
         # logging.info(final_datafinal_data)
         return JSONResponse(status_code=status.HTTP_200_OK, 
                             content= {"error": False, **final_data})
     
     except Exception as e:
-        import traceback
+        # import traceback
         # logging.error(traceback.format_exc())
         msg = str(e.error_message if hasattr(e, 'error_message') else e)
 
@@ -57,7 +59,7 @@ async def get_analysis(info: models.AnalysisModel, background_tasks: BackgroundT
     """
     try:
         # logging.info("inside intent api ....")
-        background_tasks.add_task(retrieve_data, info.call_id)
+        background_tasks.add_task(retrieve_data, info.call_id, info.did)
         # final_data = retrieve_data(calluid=info.call_id)
         # logging.info(final_datafinal_data)
         return JSONResponse(status_code=status.HTTP_200_OK,

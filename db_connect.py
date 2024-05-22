@@ -4,19 +4,38 @@ import requests,json
 from openai import OpenAI
 import pandas as pd 
 from decouple import config
+from core  import did_numbers
 
 client = OpenAI(api_key=config("OPEN_API_KEY"))
 
 current_time = datetime.now().strftime("%d-%m-%Y")
+import uuid
 
 
-def get_trans(records):
-    file = open("input.json")
-    data=json.load(file)
-    full_text =""
-    for i in range(1,7):
-        full_text+=f"agent:{data.get(f'q{i}',{}).get('text','na')} \n"
-        full_text+=f"customer:{records.get(f'userresponse_{i}','na')} \n"
+def get_trans(records, did):
+
+    # file = open("input.json")
+    file_path = open(f"./clients/{did_numbers.get(did, None)[0]}")
+
+    data = json.load(file_path)
+
+    full_text = ""
+
+    customer_answers = json.loads(dict(records.items())["userdata"])
+
+    for i in range(1,10):
+
+        try:
+            full_text+=f"agent:{data.get(f'q{i}',{}).get('text','na')} \n"
+            full_text+=f"customer:{customer_answers.get(f'q{i}','na')} \n"
+        except Exception as e:
+            break
+    
+
+    with open(f'./conversations/{str(uuid.uuid4())}.txt', 'w') as file:
+        # Write the string to the file
+        file.write(full_text)
+
     # file = requests.get(fullrecording).content
     # rp=get_dia(file)
     # dia_data=rp.json()['speech_data']
@@ -25,6 +44,8 @@ def get_trans(records):
     # trans_result=pd.DataFrame(trans_dict)[['start','end','lang_id','text','index','speaker_name','transliteration']].to_dict(orient='records')
     # return trans_result
     # print(records)
+
+    print("full text:====", full_text)
     return full_text
 
 def get_duration(input_text):
@@ -159,7 +180,7 @@ def get_lead_type(duration):
         return "dead"
 
 
-def retrieve_data(calluid):
+def retrieve_data(calluid, did):
 
     print("main process started ......")
     try:
@@ -177,25 +198,46 @@ def retrieve_data(calluid):
             cursor = connection.cursor(dictionary=True)
 
             # Retrieve data based on id
-            query = f"SELECT * FROM userreply WHERE calluid = %s"
-            cursor.execute(query, (calluid,))
-            records = cursor.fetchone()
+            try:
+                table_name = did_numbers.get(did, None)[1]
 
-            for_duration=dict(records.items())["userresponse_5"]
-            query_update = "UPDATE userreply SET sentiment = %s, days = %s,lead_type = %s WHERE calluid = %s"
+                print("table_name", table_name)
+
+            except Exception as e:
+
+                return {"error": True,
+                        "message": f"Inavalid did number {did} for table accessing..."}
+
+            query = f"SELECT * FROM {table_name} WHERE calluid = %s"
+            cursor.execute(query, (calluid,))
+
+            records = cursor.fetchone()
+            print("call data:", json.loads(dict(records.items())["userdata"]))
+
+            try:
+                for_duration = json.loads(dict(records.items())["userdata"]).get("q7", "zero")
+            except AttributeError:
+                for_duration = "zero"
+
+            print("duration text: ", for_duration)
+
+            query_update = f"UPDATE {table_name} SET sentiment = %s, days = %s,lead_type = %s WHERE calluid = %s"
 
             # Execute the query with the parameters
 
             # Commit the changes
-            transcript=get_trans(records) 
+            transcript = get_trans(records, did) 
         #     con_text = get_con(pd.DataFrame(transcript))
             sentiment = json.loads(get_sentiment(transcript)).get('sentiment','NA')
+
             duration = json.loads(get_duration(for_duration)).get('duration',0)
+
             lead_type = get_lead_type(duration)
+
             cursor.execute(query_update, (sentiment, duration, lead_type,calluid))
         connection.commit()
         print({"data": f"{calluid} {duration} {lead_type} {sentiment}"})
-        
+
         return {"error": False,
                 "call_id": calluid,
                  "duration" : duration,
