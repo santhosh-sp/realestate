@@ -7,7 +7,7 @@ import traceback
 import requests
 import json
 import sys
-from llm_api import fireworks_mixtral_intent
+from llm_api import fireworks_mixtral_intent, fireworks_llm
 from groq_llm_api import groq_api
 import time
 
@@ -85,4 +85,52 @@ class Intentfinder:
 
     def get_filename_intent(self,agent_intent,filemame_mapping):
         return filemame_mapping.get(agent_intent, "novoice.mp3")
+    
+
+def full_conversation(conversation):
+
+    full_text = " "
+
+    # print(conversation, type(conversation))
+
+    for con in conversation:
+        # print(con["speaker"], con["text"])
+        full_text += f'{con["speaker"]}: {con["text"]} \n'
+
+    return full_text
+
+def get_lead_type(duration):
+    # print(duration)
+
+    try:
+        if duration >= 0 and duration <=30:
+            return "hot"
+        elif duration > 30 and duration <= 60:
+            return "warm"
+        elif duration > 60:
+            return "cold"
+        elif duration < 0:
+            return "no_response"
+
+        else:
+            return "no_response"
+        
+    except Exception as e:
+        return "no_response"
+
+def call_analysis(call_id, conversation):
+
+    full_text = full_conversation(conversation=conversation)
+
+    features = json.loads(fireworks_llm(input_text=full_text))
+
+    # print("features:", features)
+
+    lead_type = get_lead_type(duration=features.get("duration_in_days", "no_response"))
+
+    features["lead_type"] = lead_type
+
+    return {"call_id": call_id,
+            # "conversation": conversation,
+            "features": features}
     

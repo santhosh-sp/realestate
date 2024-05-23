@@ -17,5 +17,8 @@ class AnalysisModel(BaseModel):
     call_id:str
     did : str
 
+class CallAnalysisModel(BaseModel):
+    call_id: str
+    conversation: list
 
 

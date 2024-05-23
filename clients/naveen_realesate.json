@@ -1,0 +1,122 @@
+
+
+{
+    "q1": {
+        "text": "हैल्लो, मैं रिमान Reality से नेहा बात कर रही हूँ। हमने हाल ही मैं मुम्बई में 20 से ज्यादा प्रोजैक्टस launch किये है, क्या आप कोई प्रोपर्टी search रहे है?",
+        "intents": {
+            "yes": "positive",
+            "no": "positive",
+            "others": "positive",
+            "hello": "positive",
+            "looking": "positive",
+            "not_interested": "positive"            
+        },
+        "next": "2",
+        "next_question": {"positive": "2"}
+    },
+    "q2": {
+        "text": "आप कितने BHK का फ्लैट देख रहे है?",
+        "intents": {
+            "bhk": "positive",
+            "one": "positive",
+            "two": "positive",
+            "three": "positive",
+            "not_interested": "positive",
+            "others": "positive",
+            "hello": "positive"
+        },
+        "next": "3"
+    },
+    "q3": {
+        "text": "आपका budget कितना है?",
+        "intents": {
+            "budget": "positive",
+            "not_interested": "positive",
+            "others": "positive"
+        },
+        "next": "4"
+    },
+    "q4": {
+        "text": "क्या आप new lanuching Property मैं intersted है या फिर ready to move property?",
+        "intents": {
+            "purpose": "positive",
+            "not_interested": "positive",
+            "others": "positive"
+        },
+        "next": "5"
+    },
+    "q5": {
+        "text": "आप किस लोकेशन में प्रॉपर्टी खरीदने की सोच रहे हैं?",
+        "intents": {
+            "place": "positive",
+            "yes": "positive",
+            "any_place": "positive",
+            "negative": "positive"
+        },
+        "next": "6"
+    },
+    "q6": {
+        "text": "इस प्रोपर्टी को आप अपने लिये खरीदना चहाते है या फिर investment purpose?",
+        "intents": {
+            "duration": "positive",
+            "not_interested": "positive",
+            "others": "positive"
+        },
+        "next": "7"
+    },
+    "q7": {
+
+        "text": "okay, आप इसको कितने time में इसको purcharge करना चहाते है?",
+        "intents": {
+            "duration": "positive",
+            "time": "positive",
+            "not_interested": "positive",
+            "no_time": "positive"
+        },
+        "next": "8"
+
+    },
+    "q8": {
+        "text": "आपके कीमती समय के लिये धन्यवाद, इससे आगे की जानकारी के लिये जल्द ही हमारे experts आपको कॉल करेंगें।",
+        "intents": {
+            "thanks": "positive",
+            "bye": "positive",
+            "end": "positive",
+            "others": "positive"
+        },
+        "next": "end"
+    },
+    "q9": {
+        "text": "oh,okay, अगर future में आपका काई प्रोपर्टी लेने का मन बनें तो आप हमें हमारे नमंबर पर direct call कर सकते है। आपके कीमती समय के लिये धन्यवाद",
+        "intents": {
+            "positive": "positive",
+            "negative": "negative"
+        },
+        "next": "end"
+    },
+    "q10": {
+        "text": "hmm, okay",
+        "next": "end"
+    },
+    "q11": {
+        "text" : "oh!! माफ कीजियेगा, हम अपने database को update करवाते है। यदि भविष्य में आपका कोई प्रोपर्टी लेने का मन बने तो आप हमें हमारे नंबर पर direct call कर सकते है। आपके कीमती समय के लिये धन्यवाद",
+        "next": "end"
+    },
+    "q12": {
+        "text" : "औके, कृपया कॉल करने का सही समय बताये",
+        "next": "end"
+    },
+    "q13": {
+        "text": "ठीक है! हमनें आपके द्वारा बताया गया समय नोट कर लिया है। आगे की जानकारी के लिये जल्द ही हमारे experts आपको कॉल करेंगें।",
+        "next": "end"
+    },
+    "q14": {
+        "text": "माफ करना, कुछ तकनिकी वजह से मैं आपको सुन नहीं पा रही हूँ, कृपया एक बार फिर से बताएं कि क्या आप कोई प्रोपर्टी देख रहै है?",
+        "next": "end"
+    },
+    "q15": {
+        "text": "मैं माफी चहाती हूँ, पर क्या आप कोई प्रोपर्टी देख रहै है?",
+        "next": "end"
+    }
+
+}
