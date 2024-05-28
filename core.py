@@ -7,8 +7,8 @@ import traceback
 import requests
 import json
 import sys
-from llm_api import fireworks_mixtral_intent, fireworks_llm
-from groq_llm_api import groq_api
+from llm_api import fireworks_mixtral_intent, fireworks_llm, fireworks_intent_70b
+from groq_llm_api import groq_api, groq_conversation_intent_70b
 import time
 
 logger = logging.getLogger("core")
@@ -133,4 +133,15 @@ def call_analysis(call_id, conversation):
     return {"call_id": call_id,
             # "conversation": conversation,
             "features": features}
-    
+
+def conversation_intent(question):
+
+    # intent = fireworks_intent_70b(input_text=question)
+
+    intent = groq_conversation_intent_70b(question=question)
+
+    print("Intent:", intent)
+
+    category = intent.get("category", "others")
+
+    return {"intent": category, "question": question}

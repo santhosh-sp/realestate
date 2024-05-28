@@ -94,5 +94,30 @@ async def get_call_analysis(info: models.CallAnalysisModel):
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST,
                             content= {"error": True, "data": msg})
     
+
+
+@app.post("/conversation_intent")
+async def get_conversation_intent(info: models.ConversationIntentModel):
+    """
+    Use to get_intent  to every text
+
+    """
+
+    print("conversation question :", info.customer_answer)
+    try:
+
+        ca = core.conversation_intent(question = info.customer_answer)
+
+        return JSONResponse(status_code=status.HTTP_200_OK,
+                            content= {"error": False, "data": ca})
+    except Exception as e:
+        # import traceback
+        # logging.error(traceback.format_exc())
+        msg = str(e.error_message if hasattr(e, 'error_message') else e)
+        traceback.print_exc()
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST,
+                            content= {"error": True, "data": msg})
+
+
 if  __name__ == "__main__":
     uvicorn.run(app)

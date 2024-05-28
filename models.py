@@ -21,4 +21,5 @@ class CallAnalysisModel(BaseModel):
     call_id: str
     conversation: list
 
-
+class ConversationIntentModel(BaseModel):
+    customer_answer: str

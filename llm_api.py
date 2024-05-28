@@ -108,3 +108,102 @@ def fireworks_llm(input_text):
     final_response = response.json()['choices'][0]['text']
     return final_response
 
+
+
+
+def fireworks_intent_70b(input_text):
+
+    print("llm started ..")
+    system_prompt = f"""
+    You are a real estate Hindi language AI assistant trained to categorize user answers into predefined categories. Your goal is to analyze customer answers and assign the most relevant category from the list provided below. The output should be in JSON format with the key as "category" and the value as the assigned category. The value should be in string format.
+    categories: [
+    "inquire_property_details",
+    "schedule_property_viewing",
+    "ask_property_availability",
+    "negotiate_price",
+    "request_mortgage_information",
+    "inquire_about_neighborhood",
+    "sell_property",
+    "rent_property",
+    "request_property_valuation",
+    "ask_about_property_documents",
+    "request_contact_with_agent",
+    "follow_up_on_previous_inquiry",
+    "inquire_property_management_services",
+    "ask_about_investment_opportunities",
+    "inquire_about_open_houses",
+    "request_virtual_tour",
+    "ask_for_property_recommendations",
+    "property_pricing",
+    "property_discount",
+    "ready_to_move",
+    "how_many_bhk",
+    "ready_to_move",
+    "location"
+    ]
+    NOTE:The output response format should be compulsorily in json format Without any extra explanation.
+    """
+    url = "https://api.fireworks.ai/inference/v1/completions"
+    payload = {
+        "max_tokens": 250,
+        "logprobs": None,
+        "echo": False,
+        "temperature": 0.8,
+        "top_p": 1,
+        "frequency_penalty": 0,
+        "presence_penalty": 0,
+        "n": 1,
+        "stop": None,
+        "response_format": {
+            "type": "json_object",
+            "schema":{
+            "type": "object",
+            "properties": {
+              "categories": {
+                "type": "string",
+                "enum": [
+    "inquire_property_details",
+    "schedule_property_viewing",
+    "ask_property_availability",
+    "negotiate_price",
+    "request_mortgage_information",
+    "inquire_about_neighborhood",
+    "sell_property",
+    "rent_property",
+    "request_property_valuation",
+    "ask_about_property_documents",
+    "request_contact_with_agent",
+    "follow_up_on_previous_inquiry",
+    "inquire_property_management_services",
+    "ask_about_investment_opportunities",
+    "inquire_about_open_houses",
+    "request_virtual_tour",
+    "ask_for_property_recommendations",
+    "property_pricing",
+    "property_discount",
+    "ready_to_move",
+    "how_many_bhk",
+    "ready_to_move",
+    "location"
+    ]
+              }
+            },
+            "required": ["categories"]
+          }
+        },
+    #     "response_format":{"type":"text"},
+        "stream": False,
+        "model": "accounts/fireworks/models/llama-v3-70b-instruct",
+        "prompt": system_prompt+input_text
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "authorization": f"Bearer {token}"
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    final_response = response.json()['choices'][0]['text']
+    return final_response
+
+
+

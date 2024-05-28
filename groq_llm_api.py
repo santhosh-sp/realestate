@@ -6,7 +6,7 @@ import time
 from groq import Groq
 import json
 
-client = Groq(api_key="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")
+client = Groq(api_key="GROQ_API_KEY")
 
 def groq_api(all_intents, question, answer):
 
@@ -38,6 +38,34 @@ def groq_api(all_intents, question, answer):
 
         print("error on groq api :", str(e))
         return {}
+
+def groq_conversation_intent_70b(question):
+  print("groq llm:", question)
+
+  completion = client.chat.completions.create(
+      model="llama3-70b-8192",
+      messages=[
+          {
+              "role": "system",
+            "content": "You are a real estate Hindi language AI assistant trained to categorize user answers into predefined categories. Your goal is to analyze customer answers and assign the most relevant category from the list provided below. The output should be in JSON format with the key as \"category\" and the value as the assigned category. The value should be in string format.\n\nCategories: [\n  \"inquire_property_details\",\n  \"schedule_property_viewing\",\n  \"ask_property_availability\",\n  \"negotiate_price\",\n  \"request_mortgage_information\",\n  \"inquire_about_neighborhood\",\n  \"sell_property\",\n  \"rent_property\",\n  \"request_property_valuation\",\n  \"ask_about_property_documents\",\n  \"request_contact_with_agent\",\n  \"follow_up_on_previous_inquiry\",\n  \"inquire_property_management_services\",\n  \"ask_about_investment_opportunities\",\n  \"inquire_about_open_houses\",\n  \"request_virtual_tour\",\n  \"ask_for_property_recommendations\",\n  \"property_pricing\",\n  \"property_discount\",\n  \"ready_to_move\",\n  \"how_many_bhk\",\n  \"ready_to_move\",\n  \"location\"\n]\n"          },
+          {
+              "role": "user",
+              "content": question
+          }
+      ],
+      temperature=1,
+      max_tokens=100,
+      top_p=1,
+      stream=False,
+      response_format={"type": "json_object"},
+      stop=None,
+  )
+
+  # print(completion.choices[0].message.content)
+
+  return json.loads(completion.choices[0].message.content)
+
+
 
 
 if __name__ == "__main__":

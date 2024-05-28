@@ -165,7 +165,7 @@ def get_sentiment(input_text):
 
 
 def get_lead_type(duration):
-    print(duration)
+    # print(duration)
 
     try:
         if duration > 1 and duration <=30:
@@ -175,9 +175,9 @@ def get_lead_type(duration):
         elif duration > 60:
             return "cold"
         else:
-            return "dead"
+            return "call_drop"
     except Exception as e:
-        return "dead"
+        return "call_drop"
 
 
 def retrieve_data(calluid, did):
