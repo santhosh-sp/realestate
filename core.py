@@ -8,7 +8,7 @@ import requests
 import json
 import sys
 from llm_api import fireworks_mixtral_intent, fireworks_llm, fireworks_intent_70b
-from groq_llm_api import groq_api, groq_conversation_intent_70b
+from groq_llm_api import groq_api, groq_conversation_intent_70b, groq_outbound_conversation
 import time
 
 logger = logging.getLogger("core")
@@ -16,7 +16,8 @@ logger = logging.getLogger("core")
 
 did_numbers = {
     "+911214296124": ["naveen_realesate.json", "userreply_naveen"], # callflow, customer_table 
-    "+911214296123": ["realestate_demo.json", "userreply"]
+    "+911214296123": ["realestate_demo.json", "userreply"],
+    "101": ["realestate_outbound_conversation.json", "no_table"]
 }
 
 class Intentfinder:
@@ -124,7 +125,7 @@ def call_analysis(call_id, conversation):
 
     features = json.loads(fireworks_llm(input_text=full_text))
 
-    # print("features:", features)
+    print("features:",call_id,  features)
 
     lead_type = get_lead_type(duration=features.get("duration_in_days", "no_response"))
 
@@ -145,3 +146,111 @@ def conversation_intent(question):
     category = intent.get("category", "others")
 
     return {"intent": category, "question": question}
+
+
+
+class OutBoundConversation:
+
+    ALL_INTENTS = {'inquire_property_details': 'k1',
+                    'schedule_property_viewing': 'k2',
+                    'ask_property_availability': 'k3',
+                    'negotiate_price': 'k4',
+                    'request_mortgage_information': 'k5',
+                    'inquire_about_neighborhood': 'k6',
+                    'sell_property': 'k7',
+                    'rent_property': 'k8',
+                    'request_property_valuation': 'k9',
+                    'ask_about_property_documents': 'k10',
+                    'request_contact_with_agent': 'k11',
+                    'follow_up_on_previous_inquiry': 'k12',
+                    'inquire_property_management_services': 'k13',
+                    'ask_about_investment_opportunities': 'k14',
+                    'inquire_about_open_houses': 'k15',
+                    'request_virtual_tour': 'k16',
+                    'ask_for_property_recommendations': 'k17',
+                    'property_pricing': 'k18',
+                    'property_discount': 'k19',
+                    'ready_to_move': 'k20',
+                    'how_many_bhk': 'k21',
+                    'location': 'k22'}
+
+
+
+    def __init__(self, call_id, did, customer_answer, question_number) -> None:
+
+        self.call_id = call_id
+        self.did = did
+        self.customer_answer = customer_answer
+        self.question_number = question_number
+
+        try:
+            file_path = did_numbers.get(self.did, None)[0]  # fetching call flow json file 
+
+        except Exception as e:
+
+            raise Exception(f"Invalid did number: {self.did}, Please check valid DID number... ")
+
+        
+        with open(f"./clients/{file_path}", 'r') as rfile:
+            
+          self.main_dict = json.load(rfile)
+
+
+    def main(self): 
+
+        next_question = self.main_dict[str(self.question_number)]['next']
+        # defualt_intents = self.main_dict[str(self.question_number)]['intents']
+
+        print("Question: ", self.main_dict[str(self.question_number)]['text'])
+
+        print(f"Customer Answer: {self.customer_answer}")
+
+        # print(defualt_intents)
+        
+    #     output_value = f"""
+    # categories: {list(defualt_intents.keys())}
+    # Question :  {self.main_dict[str(self.question)]['text']}
+    # Customer Answer: {self.customer_answer}
+    # """
+
+        next_question = self.main_dict[str(self.question_number)]['next']
+
+        try:   
+            rp = groq_outbound_conversation(question = self.main_dict[str(self.question_number)]['text'],
+                                            answer = self.customer_answer)
+            type_response = rp["type"]
+            
+            if type_response == "question":
+                
+                return {"intent": rp["category"], 
+                        "question": True,
+                        "next_question" : self.ALL_INTENTS[rp["category"]],
+                        "current_question": self.question_number
+                        }
+
+            elif type_response == "answer":
+
+                return {"intent": rp["category"], 
+                        "question": False,
+                        "next_question" : next_question,
+                        "current_question": self.question_number
+                        }
+
+            else:
+
+                return {"intent": "no", 
+                        "question": False,
+                        "next_question" : next_question,
+                        "current_question": self.question_number
+                        }
+        
+        except Exception as e:
+            logging.info(traceback.format_exc())
+            logging.error(str(e))
+            # raise APIException(e, sys) from e
+            return {"error": True, "message": str(e)}
+    
+    
+    def get_agent_intent(self,customer_intent, intent_mapping):
+        print(intent_mapping,customer_intent)
+        return intent_mapping.get(customer_intent, "positive")

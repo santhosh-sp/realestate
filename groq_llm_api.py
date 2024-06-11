@@ -5,8 +5,9 @@ groq llm api
 import time
 from groq import Groq
 import json
+from decouple import config
 
-client = Groq(api_key="GROQ_API_KEY")
+client = Groq(api_key=config("GROQ_API_KEY"))
 
 def groq_api(all_intents, question, answer):
 
@@ -65,6 +66,36 @@ def groq_conversation_intent_70b(question):
 
   return json.loads(completion.choices[0].message.content)
 
+
+def groq_outbound_conversation(question, answer):
+  
+    print("groq outbound conversation llm:", question)
+
+
+
+    completion = client.chat.completions.create(
+        model="llama3-70b-8192",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a Hindi language AI assistant specialized in real estate domain. Your primary task is to analyze customer responses and determine if they are questions, direct answers to an agent's question, or statements. Based on this analysis, you will assign the most relevant category from the predefined list below. Additionally, you will specify if the response is a \"question\" or \"answer\". The output must be in JSON format with two keys: \"type\" and \"category\". The \"type\" key will have the value \"question\" or \"answer\", and the \"category\" key will have the assigned category as its value, formatted as a string.\n\nCategories: [\n\"inquire_property_details\",\n\"schedule_property_viewing\",\n\"ask_property_availability\",\n\"negotiate_price\",\n\"request_mortgage_information\",\n\"inquire_about_neighborhood\",\n\"sell_property\",\n\"rent_property\",\n\"request_property_valuation\",\n\"ask_about_property_documents\",\n\"request_contact_with_agent\",\n\"follow_up_on_previous_inquiry\",\n\"inquire_property_management_services\",\n\"ask_about_investment_opportunities\",\n\"inquire_about_open_houses\",\n\"request_virtual_tour\",\n\"ask_for_property_recommendations\",\n\"property_pricing\",\n\"property_discount\",\n\"ready_to_move\",\n\"how_many_bhk\",\n\"location\"\n]",          
+            },
+            {
+                "role": "user",
+                "content": question + "\n" + answer
+            }
+        ],
+        temperature=0.3,
+        max_tokens=100,
+        top_p=1,
+        stream=False,
+        response_format={"type": "json_object"},
+        stop=None,
+    )
+
+    # print(completion.choices[0].message.content)
+
+    return json.loads(completion.choices[0].message.content)
 
 
 

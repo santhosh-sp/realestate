@@ -23,3 +23,10 @@ class CallAnalysisModel(BaseModel):
 
 class ConversationIntentModel(BaseModel):
     customer_answer: str
+
+class OutboundConversationModel(BaseModel):
+    call_id: str
+    did : str
+    customer_answer : str
+    question_number : str
+    
