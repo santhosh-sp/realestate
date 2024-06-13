@@ -19,7 +19,10 @@ class AnalysisModel(BaseModel):
 
 class CallAnalysisModel(BaseModel):
     call_id: str
+    schema_name:str
+    usecase:str
     conversation: list
+
 
 class ConversationIntentModel(BaseModel):
     customer_answer: str

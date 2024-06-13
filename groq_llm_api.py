@@ -97,6 +97,23 @@ def groq_outbound_conversation(question, answer):
 
     return json.loads(completion.choices[0].message.content)
 
+def get_groq(system_prompt,input_text):
+    completion = client.chat.completions.create(
+        model="llama3-70b-8192",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user","content": input_text}
+        ],
+        temperature=0.3,
+        max_tokens=100,
+        top_p=1,
+        stream=False,
+        response_format={"type": "json_object"},
+        stop=None,
+    )
+
+    return completion.choices[0].message.content
+
 
 
 if __name__ == "__main__":

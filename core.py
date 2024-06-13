@@ -2,17 +2,30 @@
 all core modules to be declared here 
 """
 # import torch
-import logging, ast
 import traceback
-import requests
-import json
-import sys
+import logging, ast, sys, json
+from exception import APIException
+
+#### internal 
+import models
+import custom_features
 from llm_api import fireworks_mixtral_intent, fireworks_llm, fireworks_intent_70b
 from groq_llm_api import groq_api, groq_conversation_intent_70b, groq_outbound_conversation
-import time
 
 logger = logging.getLogger("core")
 
+def find_usecase(instance,usecase):
+    usecase_name = "get_" + usecase.lower().replace("-", "_").replace(" ","_")
+    fetch_usecase = getattr(instance, usecase_name)
+    return fetch_usecase
+
+def find_client(class_name,usecase):
+    try:
+        my_class = getattr(custom_features,class_name.capitalize())
+        fetch_team = find_usecase(my_class(),usecase)
+        return fetch_team
+    except Exception as e:
+        raise APIException(e, sys) from e
 
 did_numbers = {
     "+911214296124": ["naveen_realesate.json", "userreply_naveen"], # callflow, customer_table 
@@ -87,67 +100,6 @@ class Intentfinder:
     def get_filename_intent(self,agent_intent,filemame_mapping):
         return filemame_mapping.get(agent_intent, "novoice.mp3")
     
-
-def full_conversation(conversation):
-
-    full_text = " "
-
-    # print(conversation, type(conversation))
-
-    for con in conversation:
-        # print(con["speaker"], con["text"])
-        full_text += f'{con["speaker"]}: {con["text"]} \n'
-
-    return full_text
-
-def get_lead_type(duration):
-    # print(duration)
-
-    try:
-        if duration >= 0 and duration <=30:
-            return "hot"
-        elif duration > 30 and duration <= 60:
-            return "warm"
-        elif duration > 60:
-            return "cold"
-        elif duration < 0:
-            return "no_response"
-
-        else:
-            return "no_response"
-        
-    except Exception as e:
-        return "no_response"
-
-def call_analysis(call_id, conversation):
-
-    full_text = full_conversation(conversation=conversation)
-
-    features = json.loads(fireworks_llm(input_text=full_text))
-
-    print("features:",call_id,  features)
-
-    lead_type = get_lead_type(duration=features.get("duration_in_days", "no_response"))
-
-    features["lead_type"] = lead_type
-
-    return {"call_id": call_id,
-            # "conversation": conversation,
-            "features": features}
-
-def conversation_intent(question):
-
-    # intent = fireworks_intent_70b(input_text=question)
-
-    intent = groq_conversation_intent_70b(question=question)
-
-    print("Intent:", intent)
-
-    category = intent.get("category", "others")
-
-    return {"intent": category, "question": question}
-
-
 
 class OutBoundConversation:
 
@@ -254,3 +206,25 @@ class OutBoundConversation:
     def get_agent_intent(self,customer_intent, intent_mapping):
         print(intent_mapping,customer_intent)
         return intent_mapping.get(customer_intent, "positive")
+
+
+
+def call_analysis(calldata: models.CallAnalysisModel):
+
+    call_method = find_client(class_name=calldata.schema_name,usecase=calldata.usecase)
+    features=call_method(calldata.conversation)
+    
+    return {"call_id": calldata.call_id,
+            "features": features}
+
+def conversation_intent(question):
+
+    # intent = fireworks_intent_70b(input_text=question)
+
+    intent = groq_conversation_intent_70b(question=question)
+
+    print("Intent:", intent)
+
+    category = intent.get("category", "others")
+
+    return {"intent": category, "question": question}

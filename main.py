@@ -75,14 +75,14 @@ async def get_analysis(info: models.AnalysisModel, background_tasks: BackgroundT
 @app.post("/call_analysis")
 async def get_call_analysis(info: models.CallAnalysisModel):
     """
-    Use to get_intent  to every text
+    Use to get call analysis to the conversation
 
     """
 
     print("callid:", info.call_id)
     try:
 
-        ca = core.call_analysis(call_id = info.call_id, conversation = info.conversation)
+        ca = core.call_analysis(calldata=info)
 
         return JSONResponse(status_code=status.HTTP_200_OK,
                             content= {"error": False, "data": ca})
@@ -148,4 +148,4 @@ async def get_outbound_conversation(info: models.OutboundConversationModel):
                             content= {"error": True, "data": msg})
 
 if  __name__ == "__main__":
-    uvicorn.run(app)
+    uvicorn.run(app,host="0.0.0.0",port=9000)
